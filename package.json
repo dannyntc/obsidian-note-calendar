@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-note-calendar",
-	"version": "0.2.0",
+	"version": "0.3.0",
 	"description": "Add a month calendar to an Obsidian note and link dated entries back to it.",
 	"private": true,
 	"license": "MIT",

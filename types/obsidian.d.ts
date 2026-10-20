@@ -34,12 +34,25 @@ declare module "obsidian" {
 		view: any;
 	}
 
+	export interface EditorPosition {
+		line: number;
+		ch: number;
+	}
+
+	export interface Editor {
+		setCursor(position: EditorPosition): void;
+		focus(): void;
+	}
+
 	export interface ItemView {
 		addAction(icon: string, title: string, callback: (event: MouseEvent) => any): HTMLElement;
 	}
 
 	export interface MarkdownView extends ItemView {
 		file: TFile;
+		editor?: Editor;
+		getMode?(): string;
+		setMode?(mode: "source" | "preview"): void;
 	}
 
 	export interface MarkdownPostProcessorContext {

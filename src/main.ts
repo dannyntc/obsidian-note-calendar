@@ -33,6 +33,7 @@ import {
 	parseFrontmatter,
 	removeCalendarBlock,
 } from "./storage";
+import { ENTRY_CURSOR_POSITION, buildEntryContent } from "./entry-template";
 
 interface NoteCalendarSettings {
 	entryFolder: string;
@@ -126,8 +127,25 @@ export default class NoteCalendarPlugin extends Plugin {
 	async openEntry(path: string, sourcePath: string): Promise<void> {
 		try {
 			await this.app.workspace.openLinkText(path, sourcePath, false);
+			this.positionEntryCursor();
 		} catch (error) {
 			new Notice(`Could not open entry: ${errorMessage(error)}`);
+		}
+	}
+
+	private positionEntryCursor(): void {
+		const view = this.app.workspace.activeLeaf?.view;
+		const editor = view?.editor;
+		if (!editor) return;
+
+		try {
+			if (typeof view.getMode === "function" && view.getMode() !== "source") {
+				view.setMode?.("source");
+			}
+			editor.setCursor(ENTRY_CURSOR_POSITION);
+			editor.focus();
+		} catch {
+			// The entry is still usable if Obsidian has not finished activating its editor.
 		}
 	}
 
@@ -305,15 +323,7 @@ export default class NoteCalendarPlugin extends Plugin {
 			const baseName = timestampForFilename();
 			const path = await this.availableEntryPath(folder, baseName);
 			const sourceTarget = sourcePath.replace(/\.md$/i, "");
-			const content = [
-				"---",
-				`${ENTRY_PARENT_KEY}: ${calendarId}`,
-				`${ENTRY_DATE_KEY}: ${dateKey}`,
-				"---",
-				"",
-				`[[${sourceTarget}|← Back to calendar]]`,
-				"",
-			].join("\n");
+			const content = buildEntryContent(calendarId, dateKey, sourceTarget);
 			const file = await this.app.vault.create(path, content);
 			await this.reindexFile(file);
 			await this.openEntry(file.path, sourcePath);
