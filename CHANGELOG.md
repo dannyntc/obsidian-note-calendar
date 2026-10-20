@@ -16,3 +16,9 @@
 
 - Moved the calendar backlink to the first body row of new entries.
 - Added three blank body rows and placed the editor cursor on the fifth body row.
+
+## 0.4.0 — 2026-10-20
+
+- Added a mobile single-column calendar layout for Android-sized screens.
+- Hid adjacent-month filler days on mobile and added touch-friendly controls.
+- Wrapped long entry names so mobile notes scroll vertically without horizontal panning.
