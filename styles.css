@@ -1,0 +1,267 @@
+.note-calendar-root {
+	margin: 1.25rem 0;
+}
+
+.note-calendar-scroll {
+	max-width: 100%;
+	overflow-x: auto;
+	padding: 1px;
+}
+
+.note-calendar-shell {
+	background: var(--background-primary-alt);
+	border: 1px solid var(--background-modifier-border);
+	box-sizing: border-box;
+	border-radius: var(--radius-m);
+	min-width: 600px;
+	padding: var(--size-4-4);
+}
+
+.note-calendar-toolbar {
+	align-items: center;
+	display: flex;
+	gap: var(--size-4-2);
+	justify-content: space-between;
+	margin-bottom: var(--size-4-3);
+}
+
+.note-calendar-navigation {
+	align-items: center;
+	display: flex;
+	gap: var(--size-4-2);
+}
+
+.note-calendar-title {
+	font-size: var(--font-ui-large);
+	font-weight: var(--font-semibold);
+	margin: 0;
+	min-width: 12ch;
+	text-align: center;
+}
+
+.note-calendar-icon-button,
+.note-calendar-today,
+.note-calendar-add {
+	align-items: center;
+	background: var(--background-primary);
+	border: 1px solid var(--background-modifier-border);
+	color: var(--text-normal);
+	cursor: pointer;
+	display: inline-flex;
+	justify-content: center;
+}
+
+.note-calendar-icon-button {
+	border-radius: var(--radius-s);
+	height: 2rem;
+	padding: 0;
+	width: 2rem;
+}
+
+.note-calendar-today {
+	border-radius: var(--radius-s);
+	font-size: var(--font-ui-small);
+	min-height: 2rem;
+	padding: 0 var(--size-4-3);
+}
+
+.note-calendar-icon-button:hover,
+.note-calendar-icon-button:focus-visible,
+.note-calendar-today:hover,
+.note-calendar-today:focus-visible,
+.note-calendar-add:hover,
+.note-calendar-add:focus-visible {
+	background: var(--background-modifier-hover);
+	border-color: var(--interactive-accent);
+}
+
+.note-calendar-icon-button:focus-visible,
+.note-calendar-today:focus-visible,
+.note-calendar-add:focus-visible,
+.note-calendar-entry:focus-visible {
+	box-shadow: 0 0 0 2px var(--background-primary), 0 0 0 4px var(--interactive-accent);
+	outline: none;
+}
+
+.note-calendar-icon-button:disabled,
+.note-calendar-today:disabled,
+.note-calendar-add:disabled {
+	cursor: not-allowed;
+	opacity: 0.45;
+}
+
+.note-calendar-grid {
+	display: grid;
+	gap: 1px;
+	grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.note-calendar-weekday {
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
+	font-weight: var(--font-semibold);
+	padding: 0 var(--size-4-2) var(--size-4-2);
+	text-align: left;
+}
+
+.note-calendar-day {
+	background: var(--background-primary);
+	border: 1px solid var(--background-modifier-border);
+	box-sizing: border-box;
+	min-height: 7.5rem;
+	padding: var(--size-4-2);
+}
+
+.note-calendar-day.is-outside-month {
+	background: var(--background-secondary);
+}
+
+.note-calendar-day.is-outside-month .note-calendar-day-number {
+	color: var(--text-faint);
+}
+
+.note-calendar-day.is-today {
+	border-color: var(--interactive-accent);
+	box-shadow: inset 0 0 0 1px var(--interactive-accent);
+}
+
+.note-calendar-day-header {
+	align-items: center;
+	display: flex;
+	gap: var(--size-4-1);
+	justify-content: space-between;
+	margin-bottom: var(--size-4-2);
+}
+
+.note-calendar-day-number {
+	font-size: var(--font-ui-small);
+	font-weight: var(--font-semibold);
+}
+
+.note-calendar-day-date {
+	display: none;
+}
+
+.note-calendar-add {
+	border-radius: var(--radius-s);
+	font-size: var(--font-ui-smaller);
+	min-height: 1.75rem;
+	padding: 0 var(--size-2-2);
+}
+
+.note-calendar-entries {
+	display: flex;
+	flex-direction: column;
+	gap: var(--size-2-1);
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.note-calendar-entry {
+	display: block;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.note-calendar-conflict {
+	background: var(--background-modifier-error);
+	border: 1px solid var(--text-error);
+	border-radius: var(--radius-s);
+	color: var(--text-error);
+	font-size: var(--font-ui-small);
+	margin: 0 0 var(--size-4-3);
+	padding: var(--size-4-2) var(--size-4-3);
+}
+
+.note-calendar-error {
+	color: var(--text-error);
+	padding: var(--size-4-3) 0;
+}
+
+@media (max-width: 600px) {
+	.note-calendar-scroll {
+		overflow-x: hidden;
+		padding: 0;
+	}
+
+	.note-calendar-shell {
+		min-width: 0;
+		padding: var(--size-4-3);
+		width: 100%;
+	}
+
+	.note-calendar-toolbar {
+		align-items: stretch;
+		flex-direction: column;
+	}
+
+	.note-calendar-navigation {
+		width: 100%;
+	}
+
+	.note-calendar-title {
+		min-width: 0;
+	}
+
+	.note-calendar-today {
+		min-height: 2.75rem;
+		width: 100%;
+	}
+
+	.note-calendar-grid {
+		grid-template-columns: minmax(0, 1fr);
+		gap: var(--size-4-2);
+	}
+
+	.note-calendar-weekday,
+	.note-calendar-day.is-outside-month {
+		display: none;
+	}
+
+	.note-calendar-day {
+		min-height: 0;
+		padding: var(--size-4-3);
+	}
+
+	.note-calendar-day-header {
+		justify-content: flex-end;
+		margin-bottom: var(--size-4-2);
+	}
+
+	.note-calendar-day-number {
+		display: none;
+	}
+
+	.note-calendar-day-date {
+		display: block;
+		font-size: var(--font-ui-medium);
+		font-weight: var(--font-semibold);
+		line-height: 1.3;
+		margin-bottom: var(--size-4-2);
+		overflow-wrap: anywhere;
+	}
+
+	.note-calendar-add {
+		font-size: var(--font-ui-small);
+		min-height: 2.75rem;
+		min-width: 0;
+		padding: 0 var(--size-4-3);
+	}
+
+	.note-calendar-add::before {
+		content: none;
+	}
+
+	.note-calendar-icon-button {
+		height: 2.75rem;
+		width: 2.75rem;
+	}
+
+	.note-calendar-entry {
+		white-space: normal;
+		overflow-wrap: anywhere;
+		word-break: break-word;
+	}
+}

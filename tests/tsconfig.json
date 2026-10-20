@@ -1,0 +1,16 @@
+{
+	"extends": "../tsconfig.json",
+	"compilerOptions": {
+		"module": "NodeNext",
+		"moduleResolution": "NodeNext",
+		"noEmit": false,
+		"outDir": "../.test-build",
+		"rootDir": "..",
+		"declaration": false
+	},
+	"include": [
+		"../src/calendar.ts",
+		"../src/storage.ts",
+		"*.test.ts"
+	]
+}
