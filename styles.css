@@ -2,6 +2,15 @@
 	margin: 1.25rem 0;
 }
 
+.note-calendar-header-action.is-enabled {
+	color: var(--interactive-accent);
+}
+
+.note-calendar-header-action.is-enabled:hover,
+.note-calendar-header-action.is-enabled:focus-visible {
+	color: var(--interactive-accent-hover);
+}
+
 .note-calendar-scroll {
 	max-width: 100%;
 	overflow-x: auto;

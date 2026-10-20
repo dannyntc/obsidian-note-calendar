@@ -1,6 +1,5 @@
 import {
 	Component,
-	Menu,
 	Notice,
 	Plugin,
 	PluginSettingTab,
@@ -72,6 +71,7 @@ export default class NoteCalendarPlugin extends Plugin {
 	private readonly selectedMonths = new Map<string, MonthPosition>();
 	private readonly indexTimers = new Map<string, ReturnType<typeof setTimeout>>();
 	private readonly creatingEntries = new Set<string>();
+	private readonly headerActions = new Map<any, HTMLElement>();
 
 	async onload(): Promise<void> {
 		const saved = await this.loadData().catch(() => ({}));
@@ -88,12 +88,16 @@ export default class NoteCalendarPlugin extends Plugin {
 		this.registerCommands();
 		this.registerWorkspaceEvents();
 
-		this.app.workspace.onLayoutReady?.(() => void this.rebuildIndex());
+		this.app.workspace.onLayoutReady?.(() => {
+			this.attachHeaderAction(this.app.workspace.activeLeaf);
+			void this.rebuildIndex();
+		});
 	}
 
 	onunload(): void {
 		for (const timer of this.indexTimers.values()) clearTimeout(timer);
 		this.indexTimers.clear();
+		this.headerActions.clear();
 		this.renderers.clear();
 	}
 
@@ -143,17 +147,14 @@ export default class NoteCalendarPlugin extends Plugin {
 	private registerWorkspaceEvents(): void {
 		const workspace = this.app.workspace;
 		if (workspace?.on) {
-			this.registerEvent(workspace.on("file-menu", (menu: Menu, file: TFile) => {
-				if (isMarkdownFile(file)) this.addToggleMenuItem(menu, file);
-			}));
-			this.registerEvent(workspace.on("editor-menu", (menu: Menu, _editor: any, view: any) => {
-				const file = view?.file;
-				if (isMarkdownFile(file)) this.addToggleMenuItem(menu, file);
+			this.registerEvent(workspace.on("active-leaf-change", (leaf: any) => {
+				this.attachHeaderAction(leaf);
 			}));
 			this.registerEvent(workspace.on("file-rename", (file: TFile, oldPath: string) => {
 				this.removeRecord(oldPath);
 				if (isMarkdownFile(file)) this.scheduleIndex(file);
 				this.refreshAllRenderers();
+				this.refreshHeaderActions();
 			}));
 		}
 
@@ -168,11 +169,13 @@ export default class NoteCalendarPlugin extends Plugin {
 			this.registerEvent(vault.on("delete", (file: TFile) => {
 				this.removeRecord(file.path);
 				this.refreshAllRenderers();
+				this.refreshHeaderActions();
 			}));
 			this.registerEvent(vault.on("rename", (file: TFile, oldPath: string) => {
 				this.removeRecord(oldPath);
 				if (isMarkdownFile(file)) this.scheduleIndex(file);
 				this.refreshAllRenderers();
+				this.refreshHeaderActions();
 			}));
 		}
 
@@ -183,14 +186,54 @@ export default class NoteCalendarPlugin extends Plugin {
 		}
 	}
 
-	private addToggleMenuItem(menu: Menu, file: TFile): void {
-		const enabled = this.fileRecords.get(file.path)?.kind === "owner";
-		menu.addItem((item: any) => {
-			item
-				.setTitle(enabled ? "Disable calendar" : "Enable calendar")
-				.setIcon("calendar-days")
-				.onClick(() => void this.toggleCalendar(file));
+	private attachHeaderAction(leaf: any): void {
+		const view = leaf?.view;
+		if (!view) return;
+		if (view.isDeferred && typeof view.loadIfDeferred === "function") {
+			void view.loadIfDeferred().then(() => this.attachHeaderAction(leaf));
+			return;
+		}
+		if (typeof view.addAction !== "function") return;
+
+		const existing = this.headerActions.get(view);
+		if (existing) {
+			void this.updateHeaderAction(view, existing);
+			return;
+		}
+
+		const action = view.addAction("calendar-days", "Enable calendar", () => {
+			const file = view.file;
+			if (isMarkdownFile(file)) void this.toggleCalendar(file);
 		});
+		action.classList.add("note-calendar-header-action");
+		this.headerActions.set(view, action);
+		void this.updateHeaderAction(view, action);
+	}
+
+	private async updateHeaderAction(view: any, action?: HTMLElement): Promise<void> {
+		const headerAction = action ?? this.headerActions.get(view);
+		const file = view?.file;
+		if (!headerAction || !isMarkdownFile(file)) return;
+
+		let enabled = this.fileRecords.get(file.path)?.kind === "owner";
+		try {
+			enabled = hasCalendarBlock(await this.app.vault.cachedRead(file));
+		} catch {
+			// The index remains the fallback while the note is unavailable.
+		}
+
+		const label = enabled ? "Disable calendar" : "Enable calendar";
+		setIcon(headerAction, "calendar-days");
+		setTooltip(headerAction, label);
+		headerAction.setAttribute("aria-label", label);
+		headerAction.setAttribute("aria-pressed", String(enabled));
+		headerAction.classList.toggle("is-enabled", enabled);
+	}
+
+	private refreshHeaderActions(path?: string): void {
+		for (const [view, action] of this.headerActions) {
+			if (!path || view?.file?.path === path) void this.updateHeaderAction(view, action);
+		}
 	}
 
 	private renderCalendarBlock(source: string, el: HTMLElement, ctx: any): void {
@@ -219,6 +262,7 @@ export default class NoteCalendarPlugin extends Plugin {
 			if (hasCalendarBlock(current)) {
 				await this.app.vault.modify(file, removeCalendarBlock(current));
 				await this.reindexFile(file);
+				this.refreshHeaderActions(file.path);
 				new Notice("Calendar hidden from this note.");
 				return;
 			}
@@ -234,6 +278,7 @@ export default class NoteCalendarPlugin extends Plugin {
 			const latest = await this.app.vault.read(file);
 			await this.app.vault.modify(file, insertCalendarBlock(latest, id));
 			await this.reindexFile(file);
+			this.refreshHeaderActions(file.path);
 			new Notice("Calendar enabled in this note.");
 		} catch (error) {
 			new Notice(`Could not update the calendar: ${errorMessage(error)}`);
@@ -314,6 +359,7 @@ export default class NoteCalendarPlugin extends Plugin {
 		const files = this.app.vault.getMarkdownFiles?.() ?? [];
 		await Promise.all(files.map((file: TFile) => this.reindexFile(file, false)));
 		this.refreshAllRenderers();
+		this.refreshHeaderActions();
 	}
 
 	private scheduleIndex(file: TFile): void {
@@ -336,6 +382,7 @@ export default class NoteCalendarPlugin extends Plugin {
 		try {
 			content = await this.app.vault.cachedRead(file);
 		} catch {
+			this.refreshHeaderActions(file.path);
 			return;
 		}
 
@@ -364,6 +411,7 @@ export default class NoteCalendarPlugin extends Plugin {
 			affected.add(entry.calendarId);
 		}
 
+		this.refreshHeaderActions(file.path);
 		if (refresh) this.refreshCalendars(affected);
 	}
 

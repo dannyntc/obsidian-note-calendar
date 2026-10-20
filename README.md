@@ -1,6 +1,6 @@
 # Note Calendar
 
-Note Calendar adds a monthly calendar to an ordinary Obsidian note. Use the note’s right-click menu to enable or disable it. You can also run **Toggle calendar in current note** from the command palette.
+Note Calendar adds a monthly calendar to an ordinary Obsidian note. Click the calendar button in the top-right of a Markdown note to enable or disable it. You can also run **Toggle calendar in current note** from the command palette.
 
 Select **+ Add** on any day to create a new Markdown note. The new note is stored under `Calendar entries/<calendar-id>/`, includes a date and calendar identity in its Properties, and contains a backlink to the calendar note. Its filename becomes the link shown in the day cell.
 

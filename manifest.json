@@ -1,7 +1,7 @@
 {
 	"id": "note-calendar",
 	"name": "Note Calendar",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"minAppVersion": "1.4.4",
 	"description": "Add a calendar to a note and create linked entries for each day.",
 	"author": "Danny",

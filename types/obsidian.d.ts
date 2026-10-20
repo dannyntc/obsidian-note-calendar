@@ -35,6 +35,7 @@ declare module "obsidian" {
 	}
 
 	export interface ItemView {
+		addAction(icon: string, title: string, callback: (event: MouseEvent) => any): HTMLElement;
 	}
 
 	export interface MarkdownView extends ItemView {
